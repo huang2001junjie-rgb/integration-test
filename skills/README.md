@@ -16,6 +16,7 @@ Agent skills for the OpenAN integration-testing workflow. Each skill lives in it
 | [e2e-test-regression](#e2e-test-regression) | Fixes test code for items classified `E2E_CODE_BUG` | "fix the test code per this report" |
 | [e2e-issue-verifier](#e2e-issue-verifier) | Full-stack failure verification: minimal rerun, root-cause localization, Issue/PR write-back and handoff | "verify this e2e failure / handle this Issue" |
 | [e2e-issue-retest](#e2e-issue-retest) | Reruns the original failed cases for bug Issues labeled `status/pending-test` and drafts the close/keep-open write-back | "retest this pending Issue" |
+| [skill-governor](#skill-governor) | Governs the skills themselves: rubric scoring (D1-D10), test-prompt design, A/B effectiveness checks, controlled optimization | "evaluate / govern this skill" |
 | [smoke-test](#smoke-test) | Not a skill — a smoke-test guide with sample inputs to validate the other skills | — |
 
 ## The Pipeline at a Glance
@@ -214,6 +215,20 @@ assertion 200 != 201.
 
 Retest project-openan/registry-center#42. The repo is at <local path>;
 the reproduction command is in the Issue body.
+```
+
+## skill-governor
+
+**Governs the skills themselves.** Default read-only `review` mode scores every skill (or one `target_skill`) against the 10-dimension OpenAN rubric in `references/openan-skill-rubric.md`, runs Darwin-style A/B effectiveness checks (`no_skill` vs `with_skill`, labeled `full-test`/`smoke-test` and `subagent`/`main-agent`), scans runtime neutrality, and reports the lowest dimension with evidence. `optimize` mode enters a controlled loop (max 3 rounds): one skill, one lowest dimension, one modification point per round, with an optimization proposal and user confirmation before every patch, and a keep/revert decision after.
+
+- **Hard constraints:** review mode never modifies files and writes no results file unless export is explicitly requested; without a test set it generates 3 smoke-test prompt drafts for confirmation instead of fabricating D8 results.
+- **Bundled specifications:** `references/coding-specification.md` and `references/test-specification.md` (the D3 evidence base, aligned with this repository's 16-column CSV contract and the OpenAN Integration Testing Process and Framework).
+
+```text
+/skill-governor
+
+Evaluate all skills under skills/ and output the D1-D10 score breakdown.
+Mode: review.
 ```
 
 ## smoke-test
